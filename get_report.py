@@ -187,7 +187,7 @@ st.markdown(f"# Informe de rutas para Juntoz")
 
 CLAIMS_SECRETS=[st.text_input("Por favor ingrese el token API",value="")]
 if CLAIMS_SECRETS[0] == "":
-    contnue
+    continue
 else:
     if st.sidebar.button("Actualizar datos", type="primary"):
         st.cache_data.clear()
