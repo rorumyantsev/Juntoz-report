@@ -203,7 +203,6 @@ def get_cached_report(period):
     start_ = date_from.strftime("%Y-%m-%d")
     report = get_report(period, start_, end_)
     return report
-st.write(CLAIM_SECRETS)
 if CLAIM_SECRETS[0] != "":
     df  = get_cached_report(period)
 else:
@@ -230,25 +229,26 @@ statuses = st.sidebar.multiselect(
      'accepted',
      'new'])
 
-if (not statuses or statuses == []):
-    filtered_frame = df[~df["status"].isin(["estimating_failed", "cancelled", "cancelled_by_taxi", "cancelled_with_payment"])]
-else:
-    filtered_frame = df[df['status'].isin(statuses)]
-filtered_frame = filtered_frame.sort_values(by=['client', 'client_id', 'status_time'], ascending=False, ignore_index=True)
-st.dataframe(filtered_frame)
-
-client_timezone = "America/Lima"
-TODAY = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=1)
-
-with pandas.ExcelWriter(FILE_BUFFER, engine='xlsxwriter') as writer:
-    df.to_excel(writer, sheet_name='routes_report')
-    writer.close()
-
-    st.download_button(
-        label="Descargar informe como xlsx",
-        data=FILE_BUFFER,
-        file_name=f"route_report_{TODAY}.xlsx",
-        mime="application/vnd.ms-excel"
-    )
+if CLAIM_SECRETS[0] != "":
+    if (not statuses or statuses == []):
+        filtered_frame = df[~df["status"].isin(["estimating_failed", "cancelled", "cancelled_by_taxi", "cancelled_with_payment"])]
+    else:
+        filtered_frame = df[df['status'].isin(statuses)]
+    filtered_frame = filtered_frame.sort_values(by=['client', 'client_id', 'status_time'], ascending=False, ignore_index=True)
+    st.dataframe(filtered_frame)
+    
+    client_timezone = "America/Lima"
+    TODAY = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=1)
+    
+    with pandas.ExcelWriter(FILE_BUFFER, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='routes_report')
+        writer.close()
+    
+        st.download_button(
+            label="Descargar informe como xlsx",
+            data=FILE_BUFFER,
+            file_name=f"route_report_{TODAY}.xlsx",
+            mime="application/vnd.ms-excel"
+        )
 
 st.caption("Con cariño desde YD ❤️")
