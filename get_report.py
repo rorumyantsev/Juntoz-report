@@ -13,10 +13,10 @@ import pydeck as pdk
 st.set_page_config(layout="wide")
 
 FILE_BUFFER = io.BytesIO()
-CLAIM_SECRETS = st.secrets["CLAIM_SECRETS"]
+#CLAIM_SECRETS = st.secrets["CLAIM_SECRETS"]
 API_URL = st.secrets["API_URL"]
-SECRETS_MAP = {"Leonisa": 0}
-CLIENTS_MAP = {0: "Leonisa"}
+SECRETS_MAP = {"Juntoz": 0}
+CLIENTS_MAP = {0: "Juntoz"}
 
 statuses = {
     'delivered': {'type': '4. delivered', 'state': 'in progress'},
@@ -183,67 +183,71 @@ def get_report(period, start_, end_) -> pandas.DataFrame:
     return result_frame
 
 
-st.markdown(f"# Informe de rutas para Leonisa")
+st.markdown(f"# Informe de rutas para Juntoz")
 
-if st.sidebar.button("Actualizar datos", type="primary"):
-    st.cache_data.clear()
-st.sidebar.caption(f"La recarga de la página no actualiza los datos. En su lugar, use este botón para obtener un informe nuevo")
-
-period = st.sidebar.slider ("Seleccione la profundidad del informe en días (días desde la última actualización)", min_value=1, max_value=30, value=7)
-
-@st.cache_data
-def get_cached_report(period):
-    client_timezone = "America/Lima"
-    date_to = datetime.datetime.now(timezone(client_timezone)) + datetime.timedelta(days=1)
-    end_ = date_to.strftime("%Y-%m-%d")
-    date_from = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=35)
-    start_ = date_from.strftime("%Y-%m-%d")
-    report = get_report(period, start_, end_)
-    return report
-
-
-df  = get_cached_report(period)
-
-statuses = st.sidebar.multiselect(
-    'Filtrar por estado:',
-    ['pickup_arrived',
-     'pickuped',
-     'delivery_arrived',
-     'delivered',
-     'delivered_finish',
-     'returning',
-     'return_arrived',
-     'returned',
-     'returned_finish',
-     # 'cancelled_by_taxi',
-     # 'cancelled',
-     'performer_lookup',
-     'performer_found',
-     'performer_draft',
-     'performer_not_found',
-     'failed',
-     'accepted',
-     'new'])
-
-if (not statuses or statuses == []):
-    filtered_frame = df[~df["status"].isin(["estimating_failed", "cancelled", "cancelled_by_taxi", "cancelled_with_payment"])]
+CLAIMS_SECRETS=[st.text_input("Por favor ingrese el token API",value="")]
+if CLAIMS_SECRETS[0] == "":
+    contnue
 else:
-    filtered_frame = df[df['status'].isin(statuses)]
-filtered_frame = filtered_frame.sort_values(by=['client', 'client_id', 'status_time'], ascending=False, ignore_index=True)
-st.dataframe(filtered_frame)
-
-client_timezone = "America/Lima"
-TODAY = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=1)
-
-with pandas.ExcelWriter(FILE_BUFFER, engine='xlsxwriter') as writer:
-    df.to_excel(writer, sheet_name='routes_report')
-    writer.close()
-
-    st.download_button(
-        label="Descargar informe como xlsx",
-        data=FILE_BUFFER,
-        file_name=f"route_report_{TODAY}.xlsx",
-        mime="application/vnd.ms-excel"
-    )
+    if st.sidebar.button("Actualizar datos", type="primary"):
+        st.cache_data.clear()
+    st.sidebar.caption(f"La recarga de la página no actualiza los datos. En su lugar, use este botón para obtener un informe nuevo")
+    
+    period = st.sidebar.slider ("Seleccione la profundidad del informe en días (días desde la última actualización)", min_value=1, max_value=30, value=7)
+    
+    @st.cache_data
+    def get_cached_report(period):
+        client_timezone = "America/Lima"
+        date_to = datetime.datetime.now(timezone(client_timezone)) + datetime.timedelta(days=1)
+        end_ = date_to.strftime("%Y-%m-%d")
+        date_from = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=35)
+        start_ = date_from.strftime("%Y-%m-%d")
+        report = get_report(period, start_, end_)
+        return report
+    
+    
+    df  = get_cached_report(period)
+    
+    statuses = st.sidebar.multiselect(
+        'Filtrar por estado:',
+        ['pickup_arrived',
+         'pickuped',
+         'delivery_arrived',
+         'delivered',
+         'delivered_finish',
+         'returning',
+         'return_arrived',
+         'returned',
+         'returned_finish',
+         # 'cancelled_by_taxi',
+         # 'cancelled',
+         'performer_lookup',
+         'performer_found',
+         'performer_draft',
+         'performer_not_found',
+         'failed',
+         'accepted',
+         'new'])
+    
+    if (not statuses or statuses == []):
+        filtered_frame = df[~df["status"].isin(["estimating_failed", "cancelled", "cancelled_by_taxi", "cancelled_with_payment"])]
+    else:
+        filtered_frame = df[df['status'].isin(statuses)]
+    filtered_frame = filtered_frame.sort_values(by=['client', 'client_id', 'status_time'], ascending=False, ignore_index=True)
+    st.dataframe(filtered_frame)
+    
+    client_timezone = "America/Lima"
+    TODAY = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=1)
+    
+    with pandas.ExcelWriter(FILE_BUFFER, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='routes_report')
+        writer.close()
+    
+        st.download_button(
+            label="Descargar informe como xlsx",
+            data=FILE_BUFFER,
+            file_name=f"route_report_{TODAY}.xlsx",
+            mime="application/vnd.ms-excel"
+        )
 
 st.caption("Con cariño desde YD ❤️")
