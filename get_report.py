@@ -204,7 +204,7 @@ def get_cached_report(period):
     report = get_report(period, start_, end_)
     return report
 st.write(CLAIM_SECRETS)
-if CLAIMS_SECRETS[0] != "":
+if CLAIM_SECRETS[0] != "":
     df  = get_cached_report(period)
 else:
     st.write("El token API no es válido")
