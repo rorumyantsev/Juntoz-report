@@ -78,7 +78,10 @@ def get_report(CLAIM_SECRETS, period, start_, end_) -> pandas.DataFrame:
     today = today.strftime("%Y-%m-%d")
     report = []
     for idx, secret in enumerate(CLAIM_SECRETS):
-      claims, cursor = get_claims(secret, date_from, date_to)
+      try:
+          claims, cursor = get_claims(secret, date_from, date_to)
+      except:
+          break
       while cursor:
           new_page_claims, cursor = get_claims(secret, date_from, date_to, cursor)
           claims = claims + new_page_claims
