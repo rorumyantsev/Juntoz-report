@@ -186,9 +186,7 @@ def get_report(period, start_, end_) -> pandas.DataFrame:
 st.markdown(f"# Informe de rutas para Juntoz")
 
 CLAIMS_SECRETS=[st.text_input("Por favor ingrese el token API",value="")]
-if CLAIMS_SECRETS[0] == "":
-    continue
-else:
+if CLAIMS_SECRETS[0] != "":
     if st.sidebar.button("Actualizar datos", type="primary"):
         st.cache_data.clear()
     st.sidebar.caption(f"La recarga de la página no actualiza los datos. En su lugar, use este botón para obtener un informe nuevo")
