@@ -203,7 +203,7 @@ def get_cached_report(period):
     start_ = date_from.strftime("%Y-%m-%d")
     report = get_report(period, start_, end_)
     return report
-st.write(CLAIMS_SECRETS)
+st.write(CLAIM_SECRETS)
 if CLAIMS_SECRETS[0] != "":
     df  = get_cached_report(period)
 else:
