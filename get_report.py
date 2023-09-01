@@ -68,7 +68,7 @@ def get_claims(secret, date_from, date_to, cursor=0):
     return claims['claims'], cursor
 
 
-def get_report(period, start_, end_) -> pandas.DataFrame:
+def get_report(CLAIM_SECRETS, period, start_, end_) -> pandas.DataFrame:
     client_timezone = "America/Lima"
     today = datetime.datetime.now(timezone(client_timezone))
     date_from_offset = datetime.datetime.fromisoformat(start_).astimezone(
@@ -195,16 +195,16 @@ st.sidebar.caption(f"La recarga de la página no actualiza los datos. En su luga
 period = st.sidebar.slider ("Seleccione la profundidad del informe en días (días desde la última actualización)", min_value=1, max_value=30, value=7)
 
 @st.cache_data
-def get_cached_report(period):
+def get_cached_report(period, CLAIM_SECRETS):
     client_timezone = "America/Lima"
     date_to = datetime.datetime.now(timezone(client_timezone)) + datetime.timedelta(days=1)
     end_ = date_to.strftime("%Y-%m-%d")
     date_from = datetime.datetime.now(timezone(client_timezone)) - datetime.timedelta(days=35)
     start_ = date_from.strftime("%Y-%m-%d")
-    report = get_report(period, start_, end_)
+    report = get_report(CLAIM_SECRETS, period, start_, end_)
     return report
 if CLAIM_SECRETS[0] != "":
-    df  = get_cached_report(period)
+    df  = get_cached_report(period, CLAIM_SECRETS)
 else:
     st.write("El token API no es válido")
 
